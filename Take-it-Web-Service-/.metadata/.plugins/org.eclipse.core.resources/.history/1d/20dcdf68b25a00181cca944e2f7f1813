@@ -1,0 +1,48 @@
+package sb.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import sb.data.UserData;
+
+@Component
+@Transactional
+@CrossOrigin(origins="http://localhost:4200", allowedHeaders="*")
+public class UserDAO {
+	
+	
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    
+    @PostMapping
+    public int create(UserData user) throws DataAccessException {
+        return jdbcTemplate.update("insert into cliente (primeiro_nome,apelido,contacto,email,password,idMorada) values (?,?,?,?,?,select idmorada from morada order by idmorada desc limit 1)",
+        		user.getPrimeiro_Nome(),user.getApelido(),user.getContacto(),user.getMail(),user.getPassword(),user.getIdMorada());
+    }
+    
+    public UserData read(int id) throws DataAccessException {
+        return jdbcTemplate.queryForObject("select idCliente,primeiro_nome,apelido,contacto,email,password,idMorada from cliente where idCliente = ?",
+        		                           ((rs,rownumber) -> new UserData(rs.getInt("idCliente"),rs.getString("primeiro_nome"),rs.getString("apelido"),rs.getInt("contacto"),rs.getString("email"),rs.getString("password"),rs.getInt("idMorada"))),
+        		                           id);
+    }
+    
+    public int update(UserData user) throws DataAccessException {
+        return jdbcTemplate.update("update cliente set ((primeiro_nome,apelido,contacto,email,password,idMorada) values (?,?,?,?,?,?) where idCliente = ?",user.getPrimeiro_Nome(),user.getApelido(),user.getContacto(),user.getMail(),user.getPassword(),user.getIdMorada());
+    }
+
+    public List<UserData> findAllUsers() throws DataAccessException {
+    	List<UserData> result = new ArrayList<UserData>();
+        jdbcTemplate.query("select idCliente, primeiro_nome,apelido,contacto,email,password,idMorada from Cliente",
+                           (rs, rowNum) -> result.add(new UserData(rs.getInt("idCliente"),rs.getString("primeiro_nome"),rs.getString("apelido"),rs.getInt("contacto"),rs.getString("email"),rs.getString("password"),rs.getInt("idMorada"))));
+        return result;
+    }	
+
+}

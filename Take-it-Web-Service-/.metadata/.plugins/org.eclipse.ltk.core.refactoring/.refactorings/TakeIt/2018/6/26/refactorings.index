@@ -1,0 +1,8 @@
+1529935140156	Rename field 'totalPrice'
+1529935161152	Rename field 'totalPriceWithTax'
+1529938830848	Delete element
+1530200730738	Encapsulate field 'idSessao'
+1530279296244	Encapsulate field 'quantidade1'
+1530285670692	Delete element
+1530285678508	Delete element
+1530397158974	Rename method 'gravarLinnha'

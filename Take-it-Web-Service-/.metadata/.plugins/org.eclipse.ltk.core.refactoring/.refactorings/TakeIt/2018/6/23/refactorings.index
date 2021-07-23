@@ -1,0 +1,13 @@
+1528203150797	Rename method 'setIdProduto'
+1528203170201	Rename field 'info'
+1528203199595	Rename method 'setInfo'
+1528272357600	Copy compilation units
+1528272383787	Delete element
+1528272387005	Delete element
+1528272389999	Delete element
+1528272424888	Rename type 'CategoryService'
+1528274213794	Rename local variable 'id'
+1528290293409	Rename local variable 'fieldName'
+1528366456689	Rename method 'readLogin'
+1528366487441	Rename field 'userDAO'
+1528474193738	Rename local variable 'error'

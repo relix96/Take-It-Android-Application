@@ -1,0 +1,62 @@
+package sb.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import sb.data.MoradaData;
+import sb.data.ClienteData;
+
+
+
+
+@Component
+@Transactional
+@CrossOrigin(origins="http://localhost:4200", allowedHeaders="*")
+public class ClienteDAO {
+	
+	
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    
+ 
+    @PostMapping
+    public int create(ClienteData user) throws DataAccessException {
+    	jdbcTemplate.update("insert into cliente (idCliente, primeiro_nome,apelido,contacto,email,password) values (?,?,?,?,?,?)",
+        		user.getId(),user.getPrimeiro_nome(),user.getApelido(),user.getContacto(),user.getMail(),user.getPassword());
+    	return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID() ", (rs,rownumber) -> new Integer(rs.getInt(1)));
+    	
+    }
+    
+    public ClienteData read(int id) throws DataAccessException {
+        return jdbcTemplate.queryForObject("select idCliente,primeiro_nome,apelido,contacto,email,password from cliente where idCliente = ?",
+        		                           ((rs,rownumber) -> new ClienteData(rs.getInt("idCliente"),rs.getString("primeiro_nome"),rs.getString("apelido"),rs.getInt("contacto"),rs.getString("email"),rs.getString("password"))),
+        		                           id);
+    }
+    
+    public ClienteData readUserFullData(int id) throws DataAccessException {
+        return jdbcTemplate.queryForObject("select c.idCliente, c.primeiro_Nome, c.apelido, c.contacto, c.email, c.password, a.idMorada, a.morada_1, a.morada_2, a.cod_Postal, a.localidade from cliente c, morada a where a.idCliente = c.idCliente and c.idCliente = ?",
+        		                           ((rs,rownumber) -> new ClienteData(rs.getInt("idCliente"),rs.getString("primeiro_nome"),rs.getString("apelido"),rs.getInt("contacto"),rs.getString("email"),rs.getString("password"),new MoradaData(rs.getInt("idMorada"), rs.getString("morada_1"), rs.getString("morada_2"),rs.getString("cod_Postal"), rs.getString("localidade"), rs.getInt("idCliente")))),
+        		                           id);
+    }
+    
+    
+    public int update(ClienteData user) throws DataAccessException {
+        return jdbcTemplate.update("update cliente set ((primeiro_nome,apelido,contacto,email,password) values (?,?,?,?,?) where idCliente = ?",user.getPrimeiro_nome(),user.getApelido(),user.getContacto(),user.getMail(),user.getPassword());
+    }
+
+    public List<ClienteData> findAllUsers() throws DataAccessException {
+    	List<ClienteData> result = new ArrayList<ClienteData>();
+        jdbcTemplate.query("select c.idCliente, c.primeiro_Nome, c.apelido, c.contacto, c.email, c.password, a.idMorada, a.morada_1, a.morada_2, a.cod_Postal, a.localidade from cliente c, morada a where a.idCliente = c.idCliente",
+                           (rs, rowNum) -> result.add(new ClienteData(rs.getInt("idCliente"),rs.getString("primeiro_nome"),rs.getString("apelido"),rs.getInt("contacto"),rs.getString("email"),rs.getString("password"),new MoradaData(rs.getInt("idMorada"), rs.getString("morada_1"), rs.getString("morada_2"),rs.getString("cod_Postal"), rs.getString("localidade"), rs.getInt("idCliente")))));
+        return result;
+    }
+
+}

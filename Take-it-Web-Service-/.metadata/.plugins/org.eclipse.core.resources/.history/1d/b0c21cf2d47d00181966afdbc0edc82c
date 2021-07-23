@@ -1,0 +1,172 @@
+package sb.data;
+
+import java.math.BigDecimal;
+
+public class LinhaData {
+	
+	
+    private Integer idProduto;
+    private String nomeProduto;
+    private BigDecimal preco1;
+    private BigDecimal preco2;  
+    private String porcao1;
+    private String porcao2;
+    private Integer quantidade1;
+    private Integer quantidade2;
+    private Integer unidade;
+    private Integer versao;    
+	private String descricao;
+	private Integer idCarrinho;
+	
+	public final static BigDecimal IVA = new BigDecimal(0.06);
+	
+	
+	
+
+	public Integer getIdProduto() {
+		return idProduto;
+	}
+	public void setIdProduto(Integer idProduto) {
+		this.idProduto = idProduto;
+	}
+	
+	public String getPorcao_1() {
+		return porcao1;
+	}
+	public void setPorcao_1(String porcao_1) {
+		this.porcao1 = porcao_1;
+	}
+	public String getPorcao_2() {
+		return porcao2;
+	}
+	public void setPorcao_2(String porcao_2) {
+		this.porcao2 = porcao_2;
+	}
+	
+	
+	public Integer getIdCarrinho() {
+		return idCarrinho;
+	}
+
+	public void setIdCarrinho(Integer idCarrinho) {
+		this.idCarrinho = idCarrinho;
+	}
+
+	public Integer getQuantidade1() {
+		return quantidade1;
+	}
+
+	public void setQuantidade1(Integer quantidade1) {
+		this.quantidade1 = quantidade1;
+	}
+
+	public Integer getQuantidade2() {
+		return quantidade2;
+	}
+
+	public void setQuantidade2(Integer quantidade2) {
+		this.quantidade2 = quantidade2;
+	}
+
+	
+	public Integer getVersao() {
+		return versao;
+	}
+
+	public void setVersao(Integer versao) {
+		this.versao = versao;
+	}
+	
+	public String getDescricao() {
+		return descricao;
+	}
+
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
+	}
+
+	public String getNome_produto() {
+		return nomeProduto;
+	}
+
+	public void setNome_produto(String nome_produto) {
+		this.nomeProduto = nome_produto;
+	}
+
+	public BigDecimal getPreco_1() {
+		return preco1;
+	}
+
+	public void setPreco_1(BigDecimal preco_1) {
+		this.preco1 = preco_1;
+	}
+
+	public BigDecimal getPreco_2() {
+		return preco2;
+	}
+
+	public void setPreco_2(BigDecimal preco_2) {
+		this.preco2 = preco_2;
+	}
+
+	public Integer getUnidade() {
+		return unidade;
+	}
+
+	public void setUnidade(Integer unidade) {
+		this.unidade = unidade;
+	}
+	
+	@JsonIgnore
+	public BigDecimal getPrecoTotal() {
+		return preco1.multiply(new BigDecimal(quantidade1)).add(preco2.multiply(new BigDecimal(quantidade2)));
+	}
+	
+	@JsonIgnore
+	public BigDecimal getTaxaTotal() {
+		return getPrecoTotal().multiply(IVA);
+	}
+	
+	@JsonIgnore
+	public BigDecimal getPrecoFinal() {
+		return getPrecoTotal().multiply(BigDecimal.ONE.add(IVA));
+	}
+	
+	
+
+
+	public LinhaData(Integer idProduto, Integer versao, String nomeProduto, BigDecimal preco1, BigDecimal preco2,
+			String porcao1, String porcao2, Integer unidade,Integer quantidade1,Integer quantidade2, String descricao) {
+		super();
+		this.idProduto = idProduto;
+		this.versao = versao;
+		this.nomeProduto = nomeProduto;
+		this.preco1 = preco1;
+		this.preco2 = preco2;
+		this.porcao1 = porcao1;
+		this.porcao2 = porcao2;
+		this.unidade = unidade;
+		this.quantidade1 = quantidade1;
+		this.quantidade2 = quantidade2;
+		this.descricao = descricao;
+	}
+
+	public LinhaData(Integer idCarrinho, Integer idProduto, Integer quantidade1, Integer quantidade2) {
+		super();
+		
+		this.idCarrinho = idCarrinho;
+		this.idProduto = idProduto;
+		this.quantidade1 = quantidade1;
+		this.quantidade2 = quantidade2;
+		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "LinhaData [idProduto=" + idProduto + ", nomeProduto=" + nomeProduto + ", preco1=" + preco1 + ", preco2="
+				+ preco2 + ", porcao1=" + porcao1 + ", porcao2=" + porcao2 + ", quantidade1=" + quantidade1
+				+ ", quantidade2=" + quantidade2 + ", unidade=" + unidade + ", versao=" + versao + ", idCarrinho="
+				+ idCarrinho + ", descricao=" + descricao + "]";
+	}
+	
+	
+}

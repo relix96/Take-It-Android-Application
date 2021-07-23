@@ -1,0 +1,7 @@
+git add --all
+git commit -m 'mensagem da versao'
+git push
+
+
+// Comando para puxar o repositório
+git pull

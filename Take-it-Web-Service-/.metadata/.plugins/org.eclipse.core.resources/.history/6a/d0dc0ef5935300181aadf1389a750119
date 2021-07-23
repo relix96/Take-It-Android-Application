@@ -1,0 +1,63 @@
+package sb.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import sb.data.ProductData;
+
+
+@Component
+@Transactional
+public class ProductDAO {
+	
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public int create(ProductData product) throws DataAccessException {
+        return jdbcTemplate.update("insert into produto (nome_produto, preco, stock, idCategoria) values (?,?,?,?)",product.getNomeProduto(),product.getPreco(),product.getStock(),product.getIdCategoria());
+    }
+    
+    public ProductData read(int idProduto) throws DataAccessException {
+        return jdbcTemplate.queryForObject("select idProduto,nome_produto,preco,stock, idCategoria from Produto where idProduto = ?",
+        		                           ((rs,rownumber) -> new ProductData(rs.getInt("idProduto"),rs.getString("nome_produto"),rs.getDouble("preco"),rs.getInt("stock"),rs.getInt("idCategoria"))),
+        		                           idProduto);
+    }
+    
+    public ProductData readProduct(int idCategoria) throws DataAccessException {
+        return jdbcTemplate.queryForObject("select idProduto,nome_produto,preco,stock, idCategoria from Produto where idCategoria = ?",
+        		                           ((rs,rownumber) -> new ProductData(rs.getInt("idProduto"),rs.getString("nome_produto"),rs.getDouble("preco"),rs.getInt("stock"),rs.getInt("idCategoria"))),
+        		                           idCategoria);
+    }
+    
+    
+    public int update(ProductData product) throws DataAccessException {
+        return jdbcTemplate.update("update produto set (nome_produto, preco, stock, idCategoria) values (?,?,?,?) where idProduto = ?",product.getNomeProduto(),product.getPreco(),product.getStock(),product.getIdCategoria(), product.getIdProduto());
+    }
+    
+    public int delete(int idProduct) throws DataAccessException {
+        return jdbcTemplate.update("delete from Produto where idProduto = ?",idProduct);
+    }
+
+    public List<ProductData> findAllProducts() throws DataAccessException {
+    	List<ProductData> result = new ArrayList<ProductData>();
+        jdbcTemplate.query("select idProduto,nome_produto,preco,stock, idCategoria from Produto",
+                           (rs, rowNum) -> result.add(new ProductData(rs.getInt("idProduto"),rs.getString("nome_produto"),rs.getDouble("preco"),rs.getInt("stock"),rs.getInt("idCategoria"))));
+        return result;
+    }
+    
+    public List<ProductData> findAllProductsByCategory(String nome_categoria) throws DataAccessException {
+    	List<ProductData> result = new ArrayList<ProductData>();
+        jdbcTemplate.query("select idproduto,nome_produto,preco,stock from Produto inner join categoria on produto.idcategoria = categoria.idcategoria where categoria.nome_categoria =  ?",
+                           (rs, rowNum) -> result.add(new ProductData(rs.getInt("idProduto"),rs.getString("nome_produto"),rs.getDouble("preco"),rs.getInt("stock"),rs.getInt("idCategoria"))),nome_categoria);
+        return result;
+    }
+    
+    
+
+}

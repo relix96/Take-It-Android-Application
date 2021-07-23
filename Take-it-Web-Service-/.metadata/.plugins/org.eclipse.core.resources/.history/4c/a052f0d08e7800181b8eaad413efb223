@@ -1,0 +1,98 @@
+package sb.data;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+
+public class CarrinhoData {
+
+	private Integer id;
+	private Integer idCliente;
+	private HashMap<Integer, LinhaData> linhas = new HashMap<Integer, LinhaData>();
+	private BigDecimal precoTotal = BigDecimal.ZERO;
+	private BigDecimal taxaTotal = BigDecimal.ZERO;
+	private BigDecimal precoFinal = BigDecimal.ZERO;
+	
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	
+	public CarrinhoData() {
+		super();
+	}
+
+	public Integer getIdCliente() {
+		return idCliente;
+	}
+
+	public void setIdCliente(Integer idCliente) {
+		this.idCliente = idCliente;
+	}
+
+	public BigDecimal getPrecoTotal() {
+		return precoTotal;
+	}
+
+	public void setPrecoTotal(BigDecimal precoTotal) {
+		this.precoTotal = precoTotal;
+	}
+
+	public BigDecimal getTaxaTotal() {
+		return taxaTotal;
+	}
+
+	public void setTaxaTotal(BigDecimal taxaTotal) {
+		this.taxaTotal = taxaTotal;
+	}
+
+	public BigDecimal getPrecoFinal() {
+		return precoFinal;
+	}
+
+	public void setPrecoFinal(BigDecimal precoFinal) {
+		this.precoFinal = precoFinal;
+	}
+	
+	
+
+	public CarrinhoData inserirProducto(LinhaData linha, int qtd) {
+		//adiciona produto a lista e recalcula		
+		this.linhas.put(linha.getIdProduto(),linha);
+		return null;
+		
+	} 
+
+	public CarrinhoData apagarProducto(Integer idProducto, int qtd) {
+		//remove produto e recalcula
+		
+		return null;
+	} 
+
+	private void recalcular() {
+		//pede lista com todos os buckets (Entries)
+		//itera a lista e soma valores
+	}
+
+	public CarrinhoData(Integer id, Integer idCliente, HashMap<Integer, LinhaData> produto, BigDecimal totalPrice,
+			BigDecimal totalTax, BigDecimal totalPriceWithTax) {
+		super();
+		this.id = id;
+		this.idCliente = idCliente;
+		this.linhas = produto;
+		this.precoTotal = totalPrice;
+		this.taxaTotal = totalTax;
+		this.precoFinal = totalPriceWithTax;
+	}
+	
+	
+
+	@Override
+	public String toString() {
+		return "CarrinhoData [id=" + id + ", idCliente=" + idCliente + ", produto=" + linhas + ", totalPrice="
+				+ precoTotal + ", totalTax=" + taxaTotal + ", totalPriceWithTax=" + precoFinal + "]";
+	}
+
+}

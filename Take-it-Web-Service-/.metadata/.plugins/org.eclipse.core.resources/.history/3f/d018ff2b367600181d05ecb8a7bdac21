@@ -1,0 +1,46 @@
+package sb.data;
+
+public class LinhaData {
+	private Integer idProduto;
+	private Integer porcao_1;
+	private Integer porcao_2;
+	
+	
+	
+	public LinhaData() {
+		super();
+	}
+	
+	public LinhaData(Integer idProduto, Integer idCarrinho, Integer porcao_1, Integer porcao_2) {
+		super();
+		this.idProduto = idProduto;
+		this.porcao_1 = porcao_1;
+		this.porcao_2 = porcao_2;
+	}
+	@Override
+	public String toString() {
+		return "LinhaData [idProduto=" + idProduto + ", idCarrinho=" + idCarrinho + ", porcao_1=" + porcao_1
+				+ ", porcao_2=" + porcao_2 + "]";
+	}
+	public Integer getIdProduto() {
+		return idProduto;
+	}
+	public void setIdProduto(Integer idProduto) {
+		this.idProduto = idProduto;
+	}
+	
+	public Integer getPorcao_1() {
+		return porcao_1;
+	}
+	public void setPorcao_1(Integer porcao_1) {
+		this.porcao_1 = porcao_1;
+	}
+	public Integer getPorcao_2() {
+		return porcao_2;
+	}
+	public void setPorcao_2(Integer porcao_2) {
+		this.porcao_2 = porcao_2;
+	}
+	
+	
+}

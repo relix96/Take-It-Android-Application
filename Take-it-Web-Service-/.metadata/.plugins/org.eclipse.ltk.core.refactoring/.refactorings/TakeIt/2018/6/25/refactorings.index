@@ -1,0 +1,29 @@
+1529320268488	Rename field 'addressDAO'
+1529395004603	Copy compilation unit
+1529395018750	Copy compilation unit
+1529395030298	Copy compilation unit
+1529395043035	Copy compilation unit
+1529395054620	Copy compilation unit
+1529395071038	Copy compilation unit
+1529403991109	Rename local variable 'product'
+1529425920938	Rename method 'setCliente'
+1529427454674	Copy compilation units
+1529506875069	Rename method 'getByEmail'
+1529574252440	Rename local variable 'cookie'
+1529580000329	Move method
+1529580010572	Move method
+1529580013648	Move method
+1529580025718	Move method
+1529580027956	Move method
+1529580044302	Move method
+1529660579211	Encapsulate field 'idSessao'
+1529660584227	Encapsulate field 'produto'
+1529665451091	Encapsulate field 'idCliente'
+1529665456329	Encapsulate field 'produto'
+1529665462210	Encapsulate field 'totalPrice'
+1529665466849	Encapsulate field 'totalTax'
+1529665471169	Encapsulate field 'totalPriceWithTax'
+1529676494249	Rename local variable 'idCart'
+1529682661926	Rename field 'produto'
+1529683092529	Rename field 'producto'
+1529683133258	Rename local variable 'producto'

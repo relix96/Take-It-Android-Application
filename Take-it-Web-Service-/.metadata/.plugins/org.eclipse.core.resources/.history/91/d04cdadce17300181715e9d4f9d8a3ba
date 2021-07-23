@@ -1,0 +1,62 @@
+
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+import sb.dao.MoradaDAO;
+import sb.data.MoradaData;
+
+@RestController
+@CrossOrigin(origins="http://localhost:4200", allowedHeaders="*")
+public class MoradaService {
+
+	private final static Logger logger = LoggerFactory.getLogger(MoradaService.class);
+	
+    @Autowired
+    private MoradaDAO addressDAO;
+    
+    @GetMapping("/address/find/{id}")
+    public ResponseEntity<?> findAddress(@PathVariable("id") int id) {
+    	try {
+    		logger.info(">findAddress("+id+")");
+    		MoradaData result = addressDAO.read(id);
+    		logger.info("<findAddress:"+result);
+            return new ResponseEntity<MoradaData>(result,HttpStatus.OK);
+    	} catch (Exception e) {
+    		logger.error(e.getMessage(),e);
+    		return new ResponseEntity<String>("Error Accessing Data",HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
+    }
+    
+    @GetMapping("/address/findAll")
+    public ResponseEntity<?> listAddress() {
+    	try {
+    		logger.info(">findAll(Address)");
+            return new ResponseEntity<List<MoradaData>>(addressDAO.findAllAddress(),HttpStatus.OK);
+    	} catch (Exception e) {
+    		logger.error(e.getMessage(),e);
+    		return new ResponseEntity<String>("Error Accessing Data",HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
+    }
+    
+    /*
+    @GetMapping(value = "/user/delete/{id}")
+    public ResponseEntity<UserData> deleteUser(@PathVariable("id") int id) {
+        System.out.println("Fetching & Deleting User with id " + id);
+        userDAO.delete(id);
+        return new ResponseEntity<UserData>(HttpStatus.NO_CONTENT);
+    }*/
+ 
+    
+
+}

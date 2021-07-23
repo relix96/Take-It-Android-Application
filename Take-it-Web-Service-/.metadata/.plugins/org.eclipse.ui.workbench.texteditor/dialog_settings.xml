@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item value="false" key="isRegEx"/>
+		<item value="spring" key="selection"/>
+		<item value="false" key="casesensitive"/>
+		<item value="false" key="incremental"/>
+		<item value="true" key="wrap"/>
+		<item value="false" key="wholeword"/>
+		<list key="findhistory">
+			<item value="spring"/>
+			<item value="takeit"/>
+			<item value="catalina"/>
+			<item value="O campo"/>
+			<item value="O campo CÃ³digo postal "/>
+			<item value="O campo CÃ³digo postal invÃ¡lido. "/>
+			<item value="package sb.dao;"/>
+			<item value="insert into carrinho_linha"/>
+		</list>
+		<list key="replacehistory">
+			<item value="logger.info(&quot;&gt;"/>
+			<item value=" preco_1,preco_2,porcao_1,porcao_2, unidade"/>
+			<item value="id"/>
+		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item value="257" key="DIALOG_WIDTH"/>
+		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
+		<item value="381" key="DIALOG_HEIGHT"/>
+		<item value="1356" key="DIALOG_X_ORIGIN"/>
+		<item value="207" key="DIALOG_Y_ORIGIN"/>
+	</section>
+</section>

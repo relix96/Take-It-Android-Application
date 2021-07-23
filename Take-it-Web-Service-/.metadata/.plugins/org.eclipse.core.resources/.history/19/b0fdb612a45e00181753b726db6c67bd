@@ -1,0 +1,80 @@
+package sb.ws;
+
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import sb.dao.AddressDAO;
+import sb.dao.UserDAO;
+import sb.data.AddressData;
+import sb.data.UserData;
+
+@RestController
+@CrossOrigin(origins="http://localhost:4200", allowedHeaders="*")
+public class UserService {
+
+	private final static Logger logger = LoggerFactory.getLogger(UserService.class);
+	
+    @Autowired
+    private UserDAO userDAO;
+    
+    @Autowired
+    private AddressDAO addressDAO;
+    
+    @GetMapping("/user/find/{id}")
+    public ResponseEntity<?> findUser(@PathVariable("id") int id) {
+    	try {
+    		logger.info(">findUser("+id+")");
+    		UserData result = userDAO.read(id);
+    		logger.info("<findUser:"+result);
+            return new ResponseEntity<UserData>(result,HttpStatus.OK);
+    	} catch (Exception e) {
+    		logger.error(e.getMessage(),e);
+    		return new ResponseEntity<String>("Error Accessing Data",HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
+    }
+    
+    @GetMapping("/user/findAll")
+    public ResponseEntity<?> listUsers() {
+    	try {
+    		logger.info(">findAll(User)");
+            return new ResponseEntity<List<UserData>>(userDAO.findAllUsers(),HttpStatus.OK);
+    	} catch (Exception e) {
+    		logger.error(e.getMessage(),e);
+    		return new ResponseEntity<String>("Error Accessing Data",HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
+    }
+    
+    @PostMapping("/user/createUser")
+    public ResponseEntity<Void> createUser(@RequestBody UserData user, UriComponentsBuilder ucBuilder) {        
+        int newUserId = userDAO.create(user);
+        AddressData addr = user.getAddress();
+        addr.setIdUser(newUserId);
+        addressDAO.create(addr);
+        return new ResponseEntity<Void>(HttpStatus.CREATED);
+    }
+ 
+   
+    /*
+    @GetMapping(value = "/user/delete/{id}")
+    public ResponseEntity<UserData> deleteUser(@PathVariable("id") int id) {
+        System.out.println("Fetching & Deleting User with id " + id);
+        userDAO.delete(id);
+        return new ResponseEntity<UserData>(HttpStatus.NO_CONTENT);
+    }*/
+ 
+    
+
+}

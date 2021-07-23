@@ -1,0 +1,9 @@
+git clone do repositorio para o Desktop
+git add --all
+git commit -m 'mensagem da versao'
+git push
+git reset --hard <id do commit>
+
+
+// Comando para puxar o repositorio
+git pull

@@ -1,0 +1,314 @@
+package sb.dao;
+
+import java.util.Date;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import sb.data.MoradaData;
+import sb.data.SessaoData;
+
+import sb.ws.ClienteService;
+import sb.ws.SessaoService;
+
+import sb.data.ClienteData;
+
+import sb.SBApplication;
+
+
+@Component
+@Transactional
+@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*")
+public class ClienteDAO {
+
+	
+	private final static Logger logger = LoggerFactory.getLogger(ClienteService.class);
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private MoradaDAO moradaDAO;
+	
+	@Autowired
+	private SessaoDAO sessaoDAO;
+
+	// retorna o id do ultimo user para registar na tabela na morada se todos os
+	// campos estiverem bem introduzidos
+	
+	
+	public ClienteData readById(int id) throws DataAccessException {
+		return jdbcTemplate.queryForObject(
+				"select c.id, c.primeiro_Nome, c.apelido, c.contacto, c.email, c.password, a.id, a.morada_1, a.morada_2, a.cod_Postal, a.localidade, a.idCliente from cliente c, morada a where a.idCliente = c.id and c.id = ?",
+				((rs, rownumber) -> new ClienteData(rs.getInt("id"), rs.getString("primeiro_nome"),
+						rs.getString("apelido"), rs.getInt("contacto"), rs.getString("email"), rs.getString("password"),
+						new MoradaData(rs.getInt("id"), rs.getString("morada_1"), rs.getString("morada_2"),
+								rs.getString("cod_Postal"), rs.getString("localidade"), rs.getInt("idCliente")),new SessaoData(rs.getString("id"), rs.getDate("data_fim"), rs.getInt("idCliente")))),
+				id);
+	}
+
+	
+	
+	
+	@PostMapping
+	public Integer create(ClienteData cliente, String uniqueID,StringBuilder errorBuilder) throws DataAccessException {
+	
+		try {
+			logger.info("Verificar Cliente");
+			if (readRegistar(cliente, errorBuilder)) {
+				logger.info("O email" + cliente.getMail() + "não existe!");
+				jdbcTemplate.update(
+						"insert into cliente (id, primeiro_nome,apelido,contacto,email,password) values (?,?,?,?,?,?)",
+						cliente.getId(), cliente.getPrimeiro_nome(), cliente.getApelido(), cliente.getContacto(), cliente.getMail(),
+						cript(cliente.getPassword()));
+				
+			Integer newClienteId = 	jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID() ",
+						(rs, rownumber) -> new Integer(rs.getInt(1)));
+				
+				logger.info(">createUser:" + newClienteId);
+				cliente.getMorada().setIdUser(newClienteId);			
+				moradaDAO.create(cliente.getMorada());
+				
+				Date data = new Date();
+				logger.info(data.toString());
+				cliente.getSessao().setId(uniqueID);
+				cliente.getSessao().setData_fim(data);
+				cliente.getSessao().setIdCliente(newClienteId);
+				sessaoDAO.create(cliente.getSessao());
+				return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID() ",
+						(rs, rownumber) -> new Integer(rs.getInt(1)));
+			} else {
+				return null;
+			}
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			errorBuilder.append(SBApplication.ERROR_MSG);
+			return null;
+
+		}		
+	}
+
+	public Integer loginCliente(String email, String password ,String uniqueID,StringBuilder errorBuilder ) throws DataAccessException, NoSuchAlgorithmException {
+		logger.info("verificar cliente: "+email+password);
+		logger.info("teste para as cookies => "+ uniqueID);
+		if(validarLogin(email, password)){
+			Date data = new Date();
+			return 1;
+		}
+		else{
+			errorBuilder.append("Os campos inseridos estão incorretos!");	
+			return null; 
+		}	
+		
+	}
+	
+	public boolean validarLogin(String email, String password) throws DataAccessException, NoSuchAlgorithmException {
+		logger.info("teste=> "+ email + password);
+		if (isValid(email) && validarPassword(password)) {		
+			
+			logger.info("login=>"+email+cript(password));
+			
+			logger.info( jdbcTemplate.queryForObject("SELECT exists(select 1 FROM cliente where email like ? and password like ?)",
+					(rs, rownumber) -> new Boolean(rs.getBoolean(1)), email, cript(password)).toString());
+			
+			return jdbcTemplate.queryForObject("SELECT exists(select 1 FROM cliente where email like ? and password like ?)",
+					(rs, rownumber) -> new Boolean(rs.getBoolean(1)), email, cript(password));
+		} else
+			return false;
+	}
+	
+	private boolean emptyField(Object campo, String nomeCampo, StringBuilder errorBuilder) {
+		String coluna;
+		coluna = String.valueOf(campo);
+		
+		if (coluna == "null" || coluna.trim().length() == 0) {
+			errorBuilder.append("O campo " + nomeCampo + " encontra-se vazio.\n");
+			
+			return false;
+		}
+		return true;
+	}
+	
+
+	private boolean invalidChar(Object campo, String nomeCampo, StringBuilder errorBuilder) {
+		String coluna;
+		coluna = String.valueOf(campo);
+		
+		if (nomeCampo == "Contacto") {
+			if(!soNumeros(coluna)){
+				errorBuilder.append("O campo " + nomeCampo + " só pode conter números.\n");
+				return false;
+			}			
+		}
+		if(nomeCampo == "Código postal"){
+			if(!CodPostal(campo.toString()))
+					return false;
+		}
+		else
+			if(!soNumeros(campo.toString())){
+				logger.info("Tetste =>"+campo.toString());
+				return false;				
+		}
+		return true;
+	}
+	
+
+
+	private boolean readRegistar(ClienteData cliente , StringBuilder errorBuilder) throws DataAccessException {
+		
+		logger.info(">readLogin(" + cliente + "#" + cliente.getMorada() + ")");
+		try {
+			// validar o input do Cliente
+			emptyField(cliente.getPrimeiro_nome(), "Primeiro Nome", errorBuilder);			
+			emptyField(cliente.getApelido(), "Apelido", errorBuilder);
+			emptyField(cliente.getContacto(), "Contacto", errorBuilder);
+			emptyField(cliente.getMail(),"Email", errorBuilder);
+			emptyField(cliente.getPassword(), "Password", errorBuilder);
+			emptyField(cliente.getMorada().getMorada_1(), "Morada 1", errorBuilder);
+			emptyField(cliente.getMorada().getCod_postal(), "Código postal", errorBuilder);
+			emptyField(cliente.getMorada().getLocalidade(), "Localidade", errorBuilder);
+			
+			
+			logger.info(errorBuilder.toString());
+			if (errorBuilder.toString().isEmpty()){
+				invalidChar(cliente.getPrimeiro_nome(), "Primeiro Nome", errorBuilder);			
+				invalidChar(cliente.getApelido(), "Apelido", errorBuilder);
+				invalidChar(cliente.getContacto(), "Contacto", errorBuilder);
+				invalidChar(cliente.getMorada().getMorada_1(), "Morada 1", errorBuilder);
+				if(cliente.getMorada().getMorada_1().toString() != null)
+					invalidChar(cliente.getMorada().getMorada_1(), "Morada 2", errorBuilder);
+				invalidChar(cliente.getMorada().getCod_postal(), "Código postal", errorBuilder);
+				invalidChar(cliente.getMorada().getLocalidade(), "Localidade", errorBuilder);
+				if(errorBuilder.toString().isEmpty()){
+				if (validarEmail(cliente.getMail()) == false) {
+					logger.info(">User com os dados todos(" + cliente + "#" + cliente.getMorada() + ")");
+					return true;
+				} else {
+					
+					errorBuilder.append("Este email já existe!!");
+					return false;
+				}
+			}
+				else
+					return false;
+		}else {
+				return false;
+			}
+		}
+
+		catch (Exception e) {
+			logger.error(e.getMessage(), e);			
+			return false;
+		}
+	}
+	
+	
+	
+	
+	public boolean validarPassword(String password) throws DataAccessException{
+		
+		if(password.length()>= 6)
+			return true;
+		else
+			return false;	
+		
+	}
+	
+	public boolean validarEmail(String email) throws EmptyResultDataAccessException {
+
+		if (isValid(email)) {
+			try {
+				return jdbcTemplate.queryForObject("SELECT true FROM cliente where email like ?;",
+						(rs, rownumber) -> new Boolean(rs.getBoolean(1)), email);
+			}
+			catch (Exception e) {
+				logger.error(e.getMessage(), e);			
+				return false;
+			}
+		} else
+			return false;
+		
+
+	}
+
+	
+	
+	
+	public ClienteData getByEmail(String email) throws DataAccessException {
+		return jdbcTemplate.queryForObject(
+				"select c.id, c.primeiro_Nome, c.apelido, c.contacto, c.email, c.password, a.id, a.morada_1, a.morada_2, a.cod_Postal, a.localidade, a.idCliente from cliente c, morada a where a.idCliente = c.id and c.email = ?",
+				((rs, rownumber) -> new ClienteData(rs.getInt("id"), rs.getString("primeiro_nome"),
+						rs.getString("apelido"), rs.getInt("contacto"), rs.getString("email"), rs.getString("password"),
+						new MoradaData(rs.getInt("id"), rs.getString("morada_1"), rs.getString("morada_2"),
+								rs.getString("cod_Postal"), rs.getString("localidade"), rs.getInt("idCliente")), null)),
+				email);
+	}
+
+	public int update(ClienteData user) throws DataAccessException {
+		return jdbcTemplate.update(
+				"update cliente set ((primeiro_nome,apelido,contacto,email,password) values (?,?,?,?,?) where id = ?",
+				user.getPrimeiro_nome(), user.getApelido(), user.getContacto(), user.getMail(), user.getPassword());
+	}
+
+	public String cript(String input) throws NoSuchAlgorithmException {
+		MessageDigest pass = MessageDigest.getInstance("MD5");
+		pass.reset();
+		pass.update(input.getBytes());
+		byte[] encryp = pass.digest();
+		BigInteger bigInt = new BigInteger(1, encryp);
+		String hashtext = bigInt.toString(16);
+		while (hashtext.length() < 32) {
+			hashtext = "0" + hashtext;
+		}
+		return hashtext;
+
+	}
+
+	public static boolean isValid(String email) {
+		String emailRegex = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+		Pattern pat = Pattern.compile(emailRegex);
+		logger.info("validar email #"+email+"=>"+pat.matcher(email).matches());
+		if (email == null)			
+			return false;
+		logger.info("validar email=>"+emailRegex, pat.matcher(email).matches());
+		return pat.matcher(email).matches();
+	}
+	
+	public static boolean CodPostal(String codPostal) {
+		char[] chars = codPostal.toCharArray();
+		
+		if(chars.length>8 || chars[4] != '-')
+			return false;
+		else
+		{
+			for(int idx = 0; chars[idx]< 8; idx ++)
+			{
+				if(chars[idx]<'0' || chars[idx]> '9')
+					return false;
+			}
+			return true;
+		}
+	}
+
+	public boolean soNumeros(String validar){
+		if(validar.matches("[0-9]+"))
+			return true;
+		else
+			return false;
+	}
+
+}
