@@ -1,0 +1,247 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+-- -----------------------------------------------------
+-- Schema takeit
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema takeit
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `takeit` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `takeit` ;
+
+-- -----------------------------------------------------
+-- Table `takeit`.`cliente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`cliente` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `Primeiro_Nome` VARCHAR(45) NOT NULL,
+  `Apelido` VARCHAR(45) NOT NULL,
+  `Contacto` VARCHAR(45) NOT NULL,
+  `Email` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 163
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`carrinho`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`carrinho` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `idCliente` INT(11) NOT NULL,
+  `precoTotal` DECIMAL(10,2) NOT NULL,
+  `precoTaxa` DECIMAL(10,2) NOT NULL,
+  `precoFinal` DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `idCliente_fk_idx` (`idCliente` ASC),
+  CONSTRAINT `idCliente__fk`
+    FOREIGN KEY (`idCliente`)
+    REFERENCES `takeit`.`cliente` (`id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 14
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`categoria`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`categoria` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `nome_categoria` VARCHAR(45) NOT NULL,
+  `descricao` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `nome_categoria_UNIQUE` (`nome_categoria` ASC),
+  UNIQUE INDEX `idCategoria_UNIQUE` (`id` ASC))
+ENGINE = InnoDB
+AUTO_INCREMENT = 9
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`produto`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`produto` (
+  `id` INT(11) NOT NULL,
+  `nomeProduto` VARCHAR(60) NOT NULL,
+  `preco` DECIMAL(10,2) NOT NULL,
+  `porcao` VARCHAR(45) NOT NULL,
+  `porcaoPack` VARCHAR(45) NULL DEFAULT NULL,
+  `precoPack` DECIMAL(10,2) NULL DEFAULT NULL,
+  `quantidadeMinima` INT(2) NULL DEFAULT NULL,
+  `descricao` VARCHAR(45) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_bin' NULL DEFAULT NULL,
+  `idCategoria` INT(11) NOT NULL,
+  `versao` INT(11) NULL DEFAULT NULL,
+  `destaque` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `idCategoria` (`idCategoria` ASC),
+  CONSTRAINT `idCategoria`
+    FOREIGN KEY (`idCategoria`)
+    REFERENCES `takeit`.`categoria` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`carrinho_linha`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`carrinho_linha` (
+  `idProduto` INT(11) NOT NULL,
+  `idCarrinho` INT(11) NOT NULL,
+  `quantidade` INT(11) NULL DEFAULT NULL,
+  `quantidadePack` INT(11) NULL DEFAULT NULL,
+  `versao` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`idProduto`, `idCarrinho`),
+  INDEX `idCarrinho_fk_idx` (`idCarrinho` ASC),
+  CONSTRAINT `idCarrinho_fk`
+    FOREIGN KEY (`idCarrinho`)
+    REFERENCES `takeit`.`carrinho` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `idProduto_kf`
+    FOREIGN KEY (`idProduto`)
+    REFERENCES `takeit`.`produto` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`morada_historico`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`morada_historico` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `morada_1` VARCHAR(1000) NOT NULL,
+  `morada_2` VARCHAR(45) NULL DEFAULT NULL,
+  `Cod_Postal` VARCHAR(10) NOT NULL,
+  `Localidade` VARCHAR(45) NOT NULL,
+  `idCliente` INT(11) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 61
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`compra`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`compra` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `idCliente` INT(11) NOT NULL,
+  `data_compra` VARCHAR(45) NOT NULL,
+  `idMorada_hist` INT(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `idCliente_idx` (`idCliente` ASC),
+  INDEX `idMoradaHist_idx` (`idMorada_hist` ASC),
+  CONSTRAINT `idCliente`
+    FOREIGN KEY (`idCliente`)
+    REFERENCES `takeit`.`cliente` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `idMoradaHist`
+    FOREIGN KEY (`idMorada_hist`)
+    REFERENCES `takeit`.`morada_historico` (`id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 57
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`produto_historico`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`produto_historico` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `nomeProduto` VARCHAR(60) NOT NULL,
+  `preco` DECIMAL(10,2) NOT NULL,
+  `porcao` VARCHAR(45) NOT NULL,
+  `porcaoPack` VARCHAR(45) NULL DEFAULT NULL,
+  `precoPack` DECIMAL(10,2) NULL DEFAULT NULL,
+  `quantidadeMinima` INT(2) NULL DEFAULT NULL,
+  `descricao` VARCHAR(45) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_bin' NULL DEFAULT NULL,
+  `idCategoria` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 59
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`compra_linha`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`compra_linha` (
+  `idProduto_hist` INT(11) NOT NULL,
+  `idCompra` INT(11) NOT NULL,
+  `quantidade` VARCHAR(45) NOT NULL,
+  `quantidadePack` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idProduto_hist`, `idCompra`),
+  INDEX `idProduto_hist_fk_idx` (`idProduto_hist` ASC),
+  INDEX `idCompra_fk_idx` (`idCompra` ASC),
+  CONSTRAINT `idCompra_fk`
+    FOREIGN KEY (`idCompra`)
+    REFERENCES `takeit`.`compra` (`id`),
+  CONSTRAINT `idProduto_hist_fk`
+    FOREIGN KEY (`idProduto_hist`)
+    REFERENCES `takeit`.`produto_historico` (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`morada`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`morada` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `morada_1` VARCHAR(1000) NOT NULL,
+  `morada_2` VARCHAR(45) NULL DEFAULT NULL,
+  `Cod_Postal` VARCHAR(10) NOT NULL,
+  `Localidade` VARCHAR(45) NOT NULL,
+  `idCliente` INT(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `cliente_fk` (`idCliente` ASC),
+  CONSTRAINT `cliente_fk`
+    FOREIGN KEY (`idCliente`)
+    REFERENCES `takeit`.`cliente` (`id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 16
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `takeit`.`sessao`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `takeit`.`sessao` (
+  `id` VARCHAR(100) NOT NULL,
+  `data_fim` DATETIME NOT NULL,
+  `idCliente` INT(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `idCliente_idx` (`idCliente` ASC),
+  CONSTRAINT `idCliente_fk`
+    FOREIGN KEY (`idCliente`)
+    REFERENCES `takeit`.`cliente` (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
